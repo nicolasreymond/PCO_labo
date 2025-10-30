@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/PCO_lab01_order.dir/link.d CMakeFiles/PCO_lab01_order.dir/main.cpp.o -o PCO_lab01_order  -lpcosynchro -lgtest -lpthread

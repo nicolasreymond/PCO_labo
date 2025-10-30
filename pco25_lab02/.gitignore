@@ -1,0 +1,99 @@
+# CMake build files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Build directories
+build/
+out/
+bin/
+lib/
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+main
+main_test
+main_benchmark
+
+# Qt auto-generated files
+*_autogen/
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.moc
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Logs
+*.log
+
+# PDF report (keep source .md but ignore compiled PDF)
+rapport.pdf
+
+# Test results
+Testing/
+test_results.xml
+
+# Coverage files
+*.gcno
+*.gcda
+*.gcov
+coverage/

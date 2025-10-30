@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/nreymond/dev/heig/BA3/PCO/labo/pco/pco25_lab01/cmake_install.cmake",
+		"/home/nreymond/dev/heig/BA3/PCO/labo/pco/pco25_lab01/counter/cmake_install.cmake",
+		"/home/nreymond/dev/heig/BA3/PCO/labo/pco/pco25_lab01/interlacement/cmake_install.cmake",
+		"/home/nreymond/dev/heig/BA3/PCO/labo/pco/pco25_lab01/order/cmake_install.cmake",
+		"/home/nreymond/dev/heig/BA3/PCO/labo/pco/pco25_lab01/timestamps/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
