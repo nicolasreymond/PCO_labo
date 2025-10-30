@@ -104,10 +104,17 @@ private:
 private:
     std::vector<Seller*> clinics;  ///< Clinics associated with this hospital.
     Seller* insurance = nullptr;   ///< Linked insurance provider.
+    std::map<int, int> rehabPatientsPerDaysLeft{{5,0}, {4,0}, {3,0}, {2,0}, {1,0}}; ///< Map of rehab patients and their remaining days.
 
     int maxBeds;                   ///< Maximum number of patients the hospital can accommodate.
     int nbNursingStaff;            ///< Number of nursing staff employed.
     int nbFreed = 0;               ///< Number of patients who have completed treatment and left the hospital.
+    PcoMutex mutexStock;           ///< Mutex to protect access to the hospital's stock.
+    PcoMutex mutexClinics;         ///< Mutex to protect access to the clinics list.
+    PcoMutex mutexMoney;           ///< Mutex to protect access to the hospital's funds.
+    PcoMutex mutexRehab;           ///< Mutex to protect access to rehabilitation patient data.
+    PcoMutex mutexFreed;           ///< Mutex to protect access to freed patients count.
+    PcoMutex mutexEmployees;       ///< Mutex to protect access to employee-related data.
 };
 
 #endif // HOSPITAL_H

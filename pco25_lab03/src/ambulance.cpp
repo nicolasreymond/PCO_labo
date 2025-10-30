@@ -31,7 +31,7 @@ void Ambulance::run() {
 void Ambulance::sendPatients() {
     // Déterminer le nombre de patients à envoyer
     const int nbPatientsToTransfer = this->getNumberPatients();
-    if (nbPatientsToTransfer == 0) {
+    if (nbPatientsToTransfer <= 0) {
         return; // Aucun patient à transférer, rien à faire
     }
 
