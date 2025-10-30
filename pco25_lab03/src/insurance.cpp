@@ -10,7 +10,7 @@ void Insurance::run() {
 
     while (true) {
         clock->worker_wait_day_start();
-        if (false /* TODO condition d'arrêt */) break;
+        if (PcoThread::thisThread()->stopRequested()) break;
 
         // Réception de la somme des cotisations journalières des assurés
         receiveContributions();
@@ -25,18 +25,30 @@ void Insurance::run() {
 }
 
 void Insurance::receiveContributions() {
-
-    // TODO
+    constexpr int nbContributions = 1; // TODO : Find a way to get the number of contributions
+    mutexMoney.lock();
+    this->money += nbContributions * INSURANCE_CONTRIBUTION;
+    mutexMoney.unlock();
 
 }
 
 void Insurance::invoice(int bill, Seller* who) {
-
-    // TODO
-
+    mutexBills.lock();
+    unpaidBills.emplace_back(who, bill);
+    mutexBills.unlock();
 }
 
 void Insurance::payBills() {
-
-    // TODO
+    mutexBills.lock();
+    for (const auto& [who, bill] : unpaidBills) {
+        mutexMoney.lock();
+        if (money >= bill) {
+            money -= bill;
+            mutexMoney.unlock();
+            who->pay(bill);
+        } else {
+            mutexMoney.unlock();
+        }
+    }
+    mutexBills.unlock();
 }

@@ -86,6 +86,8 @@ private:
 
 private:
     std::vector<std::pair<Seller*, int>> unpaidBills; ///< List of healthcare providers (Sellers) awaiting payment and their corresponding bill amounts.
+    PcoMutex mutexMoney; ///< Mutex to protect access to the insurance's money.
+    PcoMutex mutexBills; ///< Mutex to protect access to the unpaid bills list.
 };
 
 #endif // INSURANCE_H

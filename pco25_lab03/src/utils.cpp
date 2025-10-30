@@ -2,7 +2,10 @@
 
 void endService(const std::vector<std::unique_ptr<PcoThread> > &threads) {
 
-    // TODO
+    // Demande à tous les threads de s'arrêter
+    for (const std::unique_ptr<PcoThread>& thread : threads) {
+        thread->requestStop();
+    }
 
     std::cout << "It's time to end !" << std::endl;
 }

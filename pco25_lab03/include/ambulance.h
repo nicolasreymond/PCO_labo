@@ -106,6 +106,9 @@ protected:
     std::vector<ItemType> resourcesSupplied;  ///< Types of resources the ambulance carries.
     std::vector<Seller*> hospitals;           ///< Hospitals that can receive patients.
     Seller* insurance{nullptr};               ///< Insurance company for billing.
+    PcoMutex mutexStock;                     ///< Mutex to protect access to stocks.
+    PcoMutex mutexMoney;                     ///< Mutex to protect access to money.
+    PcoMutex mutexEmployees;                 ///< Mutex to protect access to employees number.
 };
 
 #endif // AMBULANCE_H
