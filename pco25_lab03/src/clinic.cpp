@@ -213,9 +213,9 @@ void Clinic::treatOne() {
     // Mettre à jour les stocks de patients
     stocks[ItemType::SickPatient] -= 1;
     stocks[ItemType::RehabPatient] += 1;
-    // Increment the paid-employees counters while still holding the stock mutex
+    // Increment the paid-employees counter while still holding the stock mutex
     nbEmployeesPaid++;
-    nbEmployeesPaidByType[EmployeeType::TreatmentSpecialist]++;
+    // Per-type counters are not available in this build; omit nbEmployeesPaidByType update.
     mutexStock.unlock();
 
 }
