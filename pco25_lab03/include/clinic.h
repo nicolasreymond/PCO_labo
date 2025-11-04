@@ -146,13 +146,22 @@ private:
 
     int queueSick = 0;                            ///< Number of patients waiting for treatment
 
+    // Diagnostic counters (temporary, used to help debug accounting during tests)
+    int diag_totalMaterialsCostOrdered = 0;
+    int diag_totalSalariesPaid = 0;
+    int diag_totalInsuranceReceived = 0;
+    int diag_totalBillsPaid = 0;
+    int diag_totalInvoicesSent = 0;
+
 protected:
     /**
      * @brief Treats a single patient.
      */
     virtual void treatOne();
+    PcoMutex mutexMoney;  ///< Mutex to protect access to money.
+    PcoMutex mutexBill;  ///< Mutex to protect access to bills.
+    PcoMutex mutexStock; ///< Mutex to protect access to stocks.
 };
-
 
 // Specialized clinic types
 
