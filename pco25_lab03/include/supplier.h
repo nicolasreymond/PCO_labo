@@ -101,6 +101,8 @@ private:
 
 private:
     std::vector<ItemType> resourcesSupplied; ///< List of resource types the supplier can produce.
+    PcoMutex mutexMoney;                     ///< Mutex to protect access to the supplier's money.
+    PcoMutex mutexStock;                     ///< Mutex to protect access to the supplier's stock.
 };
 
 

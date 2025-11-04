@@ -7,7 +7,7 @@
 Supplier::Supplier(int uniqueId, int fund, std::vector<ItemType> resourcesSupplied)
     : Seller(fund, uniqueId), resourcesSupplied(resourcesSupplied) {
     for (const auto& item : resourcesSupplied) {    
-        stocks[item] = 0;    
+        stocks[item] = 0;
     }
 }
 
@@ -16,7 +16,7 @@ void Supplier::run() {
 
     while (true) {
         clock->worker_wait_day_start();
-        if (false /* TODO condition d'arrêt */) break;
+        if (PcoThread::thisThread()->stopRequested()) break;
 
         attemptToProduceResource();
 
@@ -27,20 +27,28 @@ void Supplier::run() {
 }
 
 void Supplier::attemptToProduceResource() {
-
-    // TODO
-
+    const ItemType type = getRandomItemFromStock();
+    const int salary = getEmployeeSalary(EmployeeType::Supplier);
+    if (money >= salary) {
+        stocks[type] += 1;
+        money -= salary;
+        nbEmployeesPaid += 1;
+    }
 }
 
 int Supplier::buy(ItemType it, int qty) {
-
-    // TODO
+    mutexStock.lock();
+    const int availableQty = stocks[it];
+    const int qtyToSell = std::min(qty, availableQty);
+    stocks[it] -= qtyToSell;
+    mutexStock.unlock();
+    return qtyToSell * getCostPerUnit(it);
 }
 
 void Supplier::pay(int bill) {
-
-    // TODO
-
+    mutexMoney.lock();
+    money += bill;
+    mutexMoney.unlock();
 }
 
 int Supplier::getMaterialCost() {
