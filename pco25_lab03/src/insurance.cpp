@@ -3,64 +3,59 @@
 #include <pcosynchro/pcothread.h>
 
 
-Insurance::Insurance(int uniqueId, int fund) : Seller(fund, uniqueId) {}
+Insurance::Insurance(int uniqueId, int fund) : Seller(fund, uniqueId) {
+}
 
 void Insurance::run() {
-    logger() << "Insurance " <<  uniqueId << " starting with fund " << money << std::endl;
+    logger() << "Insurance " << uniqueId << " starting with fund " << money << std::endl;
 
     while (true) {
         clock->worker_wait_day_start();
         if (PcoThread::thisThread()->stopRequested()) break;
 
-        // Réception de la somme des cotisations journalières des assurés
         receiveContributions();
 
-        // Payer les factures
         payBills();
 
         clock->worker_end_day();
     }
 
-    logger() << "Insurance " <<  uniqueId << " stopping with fund " << money << std::endl;
+    logger() << "Insurance " << uniqueId << " stopping with fund " << money << std::endl;
 }
 
 void Insurance::receiveContributions() {
-    constexpr int nbContributions = 1; // TODO : Find a way to get the number of contributions
-    mutexMoney.lock();
-    this->money += nbContributions * INSURANCE_CONTRIBUTION;
-    mutexMoney.unlock();
-
+    this->money += INSURANCE_CONTRIBUTION;
 }
 
-void Insurance::invoice(int bill, Seller* who) {
+void Insurance::invoice(int bill, Seller *who) {
     mutexBills.lock();
     unpaidBills.emplace_back(who, bill);
     mutexBills.unlock();
 }
 
 void Insurance::payBills() {
-    // Payer autant de factures que possible et les retirer de la liste.
-    // Ordre de verrouillage: bills -> money. Appeler who->pay() hors verrous.
+    // The while loop continues until no more bills can be paid, it allows searching for a payable bill while protecting
+    // the bills, and pay it without holding the lock on the bills
     while (true) {
-        Seller* whoToPay = nullptr;
+        Seller *whoToPay = nullptr;
         int billToPay = 0;
 
         mutexBills.lock();
+        // Find the first bill that can be paid with the available money
         for (auto it = unpaidBills.begin(); it != unpaidBills.end(); ++it) {
-            mutexMoney.lock();
             if (money >= it->second) {
                 money -= it->second;
                 whoToPay = it->first;
                 billToPay = it->second;
                 unpaidBills.erase(it);
-                mutexMoney.unlock();
                 break;
             }
-            mutexMoney.unlock();
         }
         mutexBills.unlock();
 
+        // If no bill can be paid, stop searching
         if (!whoToPay) break;
+        // Pay the bill
         whoToPay->pay(billToPay);
     }
 }
