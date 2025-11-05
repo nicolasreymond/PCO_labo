@@ -108,7 +108,7 @@ protected:
     Seller* insurance{nullptr};               ///< Insurance company for billing.
     PcoMutex mutexStock;                     ///< Mutex to protect access to stocks.
     PcoMutex mutexMoney;                     ///< Mutex to protect access to money.
-    PcoMutex mutexEmployees;                 ///< Mutex to protect access to employees number.
+    PcoMutex mutexHospitals;                ///< Mutex to protect access to the hospitals list.
 };
 
 #endif // AMBULANCE_H

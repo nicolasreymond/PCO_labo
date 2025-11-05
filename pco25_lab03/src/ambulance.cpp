@@ -1,6 +1,5 @@
 // ambulance.cpp
 #include "ambulance.h"
-#include "costs.h"
 #include <pcosynchro/pcothread.h>
 
 
@@ -29,39 +28,38 @@ void Ambulance::run() {
 }
 
 void Ambulance::sendPatients() {
-    // Déterminer le nombre de patients à envoyer
+    // Determine the number of patients to send
     const int nbPatientsToTransfer = this->getNumberPatients();
     if (nbPatientsToTransfer <= 0) {
-        return; // Aucun patient à transférer, rien à faire
+        return; // No patient, thus nothing to do
     }
 
-    // Choisir un hôpital au hasard
+    // Choose a random hospital
+    mutexHospitals.lock();
     auto* hospital = chooseRandomSeller(hospitals);
+    mutexHospitals.unlock();
 
     const int staffSalary = getEmployeeSalary(EmployeeType::EmergencyStaff);
 
     mutexMoney.lock();
-    mutexEmployees.lock();
-    // Vérifier si l'ambulance peut payer un employé pour le transfert
+    // Checks if the ambulance can pay the employee for the transfer
     if (staffSalary <= money) {
-        // Payer l'employé
+        // Pay the employee
         money -= staffSalary;
         nbEmployeesPaid += 1;
-        mutexEmployees.unlock();
         mutexMoney.unlock();
 
-        // Transférer les patients
+        // Transfer the patients
         const int transferredPatients = hospital->transfer(ItemType::SickPatient, nbPatientsToTransfer);
         mutexStock.lock();
         stocks.at(ItemType::SickPatient) -= transferredPatients;
         mutexStock.unlock();
 
-        // Facturer l'assurance
+        // Bill the insurance
         const int billAmount = transferredPatients * getCostPerService(ServiceType::Transport);
         insurance->invoice(billAmount, this);
     } else {
-        // Ne peut pas payer un employé, transfert annulé
-        mutexEmployees.unlock();
+        // Not enough money, transfer is cancelled
         mutexMoney.unlock();
     }
 }
@@ -73,7 +71,9 @@ void Ambulance::pay(int bill) {
 }
 
 void Ambulance::setHospitals(std::vector<Seller*> h) {
+    mutexHospitals.lock();
     hospitals = std::move(h);
+    mutexHospitals.unlock();
 }
 
 void Ambulance::setInsurance(Seller* ins) { 
