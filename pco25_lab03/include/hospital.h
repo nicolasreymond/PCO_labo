@@ -114,7 +114,6 @@ private:
     PcoMutex mutexMoney;           ///< Mutex to protect access to the hospital's funds.
     PcoMutex mutexRehab;           ///< Mutex to protect access to rehabilitation patient data.
     PcoMutex mutexFreed;           ///< Mutex to protect access to freed patients count.
-    PcoMutex mutexEmployees;       ///< Mutex to protect access to employee-related data.
 };
 
 #endif // HOSPITAL_H
