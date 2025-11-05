@@ -39,16 +39,28 @@ void Insurance::invoice(int bill, Seller* who) {
 }
 
 void Insurance::payBills() {
-    mutexBills.lock();
-    for (const auto& [who, bill] : unpaidBills) {
-        mutexMoney.lock();
-        if (money >= bill) {
-            money -= bill;
-            mutexMoney.unlock();
-            who->pay(bill);
-        } else {
+    // Payer autant de factures que possible et les retirer de la liste.
+    // Ordre de verrouillage: bills -> money. Appeler who->pay() hors verrous.
+    while (true) {
+        Seller* whoToPay = nullptr;
+        int billToPay = 0;
+
+        mutexBills.lock();
+        for (auto it = unpaidBills.begin(); it != unpaidBills.end(); ++it) {
+            mutexMoney.lock();
+            if (money >= it->second) {
+                money -= it->second;
+                whoToPay = it->first;
+                billToPay = it->second;
+                unpaidBills.erase(it);
+                mutexMoney.unlock();
+                break;
+            }
             mutexMoney.unlock();
         }
+        mutexBills.unlock();
+
+        if (!whoToPay) break;
+        whoToPay->pay(billToPay);
     }
-    mutexBills.unlock();
 }

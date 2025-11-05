@@ -15,21 +15,23 @@ Clinic::Clinic(int id, int fund, std::vector<ItemType> resourcesNeeded)
 }
 
 void Clinic::run() {
-    // start message removed per request (use stderr debug prints only)
+    // Boucle quotidienne: payBills -> processNextPatient -> sendPatientsToRehab -> payBills
 
     while (true) {
         clock->worker_wait_day_start();
         if (PcoThread::thisThread()->stopRequested())
             break;
 
-        payBills();
 
-        // Essayer de traiter le prochain patient (peut commander des ressources)
+        // Traiter un patient (peut commander des ressources)
         processNextPatient();
 
 
-        // Transférer les patients déjà traités vers un hôpital pour leur réhabilitation
+        // Transférer les patients traités en rééducation
         sendPatientsToRehab();
+
+        // Régler les factures créées pendant la journée
+        payBills();
 
         clock->worker_end_day();
     }
@@ -38,17 +40,15 @@ void Clinic::run() {
 
 
 int Clinic::transfer(ItemType what, int qty) {
-    // Les cliniques n'acceptent que les transferts de patients malades
+    // Accepte uniquement SickPatient, si fonds > 0 et aucune facture impayée
     if (what != ItemType::SickPatient){
         return 0;
     }
 
-    // Si la clinique n'a pas de factures impayées et a des fonds, accepter les patients
     if (getFund() <= 0){
         return 0;
     }
 
-    // Si la clinique n'a pas de factures impayées et a des fonds, accepter les patients
     mutexBill.lock();
     bool hasUnpaid = !unpaidBills.empty();
     mutexBill.unlock();
@@ -57,7 +57,7 @@ int Clinic::transfer(ItemType what, int qty) {
         return 0;
     }
 
-    // Accepter tous les patients malades demandés (protéger le stock)
+    // Accepter et mettre à jour le stock
     mutexStock.lock();
     stocks[ItemType::SickPatient] += qty;
     mutexStock.unlock();
@@ -66,6 +66,7 @@ int Clinic::transfer(ItemType what, int qty) {
 }
 
 bool Clinic::hasResourcesForTreatment() const {
+    // Toutes les ressources requises doivent être > 0
     for (auto item : resourcesNeeded) {
         if (stocks.at(item) <= 0) {
             return false;
@@ -76,70 +77,67 @@ bool Clinic::hasResourcesForTreatment() const {
 }
 
 void Clinic::payBills() {
-    // Copy unpaid bills locally to avoid holding `mutex` while calling external
-    // Supplier::pay(), which could cause re-entrancy or cross-locking deadlocks.
-    mutexBill.lock();
-    auto localBills = unpaidBills; // copy
-    mutexBill.unlock();
+    // Règle les factures impayées; ordre de verrouillage: bills -> money.
+    // Réserver les fonds, retirer la facture, puis payer hors verrous.
+    while (true) {
+        Supplier* supToPay = nullptr;
+        int billToPay = 0;
+        bool found = false;
 
-    // For each bill, try to claim funds and pay the supplier without holding
-    // the clinic-wide `mutex`. If payment succeeds, remove it from the shared
-    // unpaidBills list under lock.
-    for (const auto &entry : localBills) {
-        Supplier* sup = entry.first;
-        int bill = entry.second;
-
-        // Try to atomically reserve the money for this bill
-        bool reserved = false;
-        mutexMoney.lock();
-        if (money >= bill) {
-            money -= bill;
-            reserved = true;
-        }
-        mutexMoney.unlock();
-
-        if (!reserved) continue;
-
-        // Pay supplier outside of clinic locks
-        sup->pay(bill);
-
-        // Remove one matching bill from unpaidBills
+        // Parcourir les factures et vérifier la trésorerie
         mutexBill.lock();
         for (auto it = unpaidBills.begin(); it != unpaidBills.end(); ++it) {
-            if (it->first == sup && it->second == bill) {
+            // Lire/modifier `money` en sécurité
+            mutexMoney.lock();
+            if (money >= it->second) {
+                supToPay = it->first;
+                billToPay = it->second;
+                // Réserver les fonds et retirer la facture
+                money -= billToPay;
                 unpaidBills.erase(it);
+                mutexMoney.unlock();
+                found = true;
                 break;
             }
+            mutexMoney.unlock();
         }
         mutexBill.unlock();
+
+        if (!found) break; // Rien à payer
+
+        // Payer le fournisseur hors section critique
+        supToPay->pay(billToPay);
     }
 }
 
 void Clinic::processNextPatient() {
-    // Si des patients malades attendent, essayez d'en traiter un. Si des ressources
-    // manquent, essayez de les commander.
+    // Si des patients attendent: commander si nécessaire, puis traiter
     mutexStock.lock();
     int waiting = stocks[ItemType::SickPatient];
     mutexStock.unlock();
 
     if (waiting > 0) {
+        if (!hasResourcesForTreatment()) {
+            // Commander les ressources manquantes
+            orderResources();
+        }
+        // Traiter si prêt
         if (hasResourcesForTreatment()) {
             treatOne();
-        } else {
-            orderResources();
         }
     }
 
 }
 
 void Clinic::sendPatientsToRehab() {
+    // Transférer tous les patients de rééducation et facturer l'assurance
     mutexStock.lock();
     int toSend = stocks[ItemType::RehabPatient];
     mutexStock.unlock();
     if (toSend <= 0) return;
     if (hospitals.empty() || insurance == nullptr) return;
 
-    // Essayer de transférer tous les patients en réhabilitation vers le premier hôpital
+    // Vers le premier hôpital
     Seller* hosp = hospitals.front();
     int admitted = hosp->transfer(ItemType::RehabPatient, toSend);
     if (admitted > 0) {
@@ -148,20 +146,20 @@ void Clinic::sendPatientsToRehab() {
         mutexStock.unlock();
 
         int bill = admitted * getCostPerService(ServiceType::Treatment);
-        // Invoicer l'assurance ; l'assurance appellera pay() sur la clinique
+        // Invoicer l'assurance (qui paiera la clinique)
         if (insurance) insurance->invoice(bill, this);
     }
 
 }
 
 void Clinic::orderResources() {
-    // Si des factures sont en attente, ne pas commander de ressources
+    // Ne pas commander si des factures sont en attente
     mutexBill.lock();
     bool hasUnpaid = !unpaidBills.empty();
     mutexBill.unlock();
     if (hasUnpaid) return;
 
-    // Pour chaque ressource requise, si la clinique n'en a pas, en commander une unité
+    // Pour chaque ressource manquante: commander 1 unité et enregistrer la facture
     for (auto item : resourcesNeeded) {
         mutexStock.lock();
         int have = stocks[item];
@@ -172,12 +170,12 @@ void Clinic::orderResources() {
             if (!sup) continue;
             int bill = sup->buy(item, 1);
             if (bill > 0) {
-                // Ajouter la ressource (protéger les stocks)
+                // Ajouter la ressource
                 mutexStock.lock();
                 stocks[item] += 1;
                 mutexStock.unlock();
 
-                // Enregistrer la facture impayée
+                // Enregistrer la facture pour payBills()
                 mutexBill.lock();
                 unpaidBills.emplace_back(sup, bill);
                 mutexBill.unlock();
@@ -188,7 +186,7 @@ void Clinic::orderResources() {
 }
 
 void Clinic::treatOne() {
-    // S'assurer qu'il y a au moins un patient malade et des ressources + fonds
+    // Traiter un patient si ressources et salaire disponibles
     mutexStock.lock();
     if (stocks[ItemType::SickPatient] <= 0) {
         mutexStock.unlock();
@@ -213,15 +211,14 @@ void Clinic::treatOne() {
     // Mettre à jour les stocks de patients
     stocks[ItemType::SickPatient] -= 1;
     stocks[ItemType::RehabPatient] += 1;
-    // Increment the paid-employees counter while still holding the stock mutex
+    // Incrémenter le compteur d'employés payés
     nbEmployeesPaid++;
-    // Per-type counters are not available in this build; omit nbEmployeesPaidByType update.
     mutexStock.unlock();
 
 }
 
 void Clinic::pay(int bill) {
-
+    // Créditer la clinique (thread-safe)
     mutexMoney.lock();
     money += bill;
     mutexMoney.unlock();
@@ -231,7 +228,7 @@ void Clinic::pay(int bill) {
 Supplier *Clinic::chooseRandomSupplier(ItemType item) {
     std::vector<Supplier*> availableSuppliers;
 
-    // Sélectionner les Suppliers qui ont la ressource recherchée
+    // Filtrer les suppliers qui vendent l'item
     for (Seller* seller : suppliers) {
         auto* sup = dynamic_cast<Supplier*>(seller);
         if (sup->sellsResource(item)) {
@@ -239,7 +236,7 @@ Supplier *Clinic::chooseRandomSupplier(ItemType item) {
         }
     }
 
-    // Choisir aléatoirement un Supplier dans la liste
+    // Choisir aléatoirement un Supplier (au moins 1 attendu)
     assert(availableSuppliers.size());
     std::vector<Supplier*> out;
     std::sample(availableSuppliers.begin(), availableSuppliers.end(), std::back_inserter(out),

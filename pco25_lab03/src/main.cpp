@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 
     for (auto& t : threads) t->join();
 
-    int startPatient = INITIAL_PATIENT_SICK;
+    int startPatient = INITIAL_PATIENT_SICK * ambulances.size(); // TODO : A ajouter au rapport
     int endPatient   = 0;
 
     int startFund = (SUPPLIER_FUND * static_cast<int>(ambulances.size())) +
