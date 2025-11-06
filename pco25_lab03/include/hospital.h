@@ -1,3 +1,5 @@
+// authors: Nicolas Reymond, Nadia Cattin
+
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
 

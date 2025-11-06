@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #include "seller.h"
 #include <random>
 #include <cassert>

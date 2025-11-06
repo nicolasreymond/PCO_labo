@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #ifndef AMBULANCE_H
 #define AMBULANCE_H
 

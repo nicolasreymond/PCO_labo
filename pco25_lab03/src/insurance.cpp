@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #include "insurance.h"
 #include "costs.h"
 #include <pcosynchro/pcothread.h>

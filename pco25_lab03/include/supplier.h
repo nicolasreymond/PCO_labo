@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #ifndef SUPPLIER_H
 #define SUPPLIER_H
 

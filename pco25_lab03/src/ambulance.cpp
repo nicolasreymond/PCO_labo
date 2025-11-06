@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 // ambulance.cpp
 #include "ambulance.h"
 #include <pcosynchro/pcothread.h>

@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #include "clinic.h"
 #include "costs.h"
 #include <pcosynchro/pcothread.h>

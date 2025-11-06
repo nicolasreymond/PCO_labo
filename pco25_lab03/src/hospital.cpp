@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 // hospital.cpp
 #include "hospital.h"
 #include "costs.h"

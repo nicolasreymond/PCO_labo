@@ -1,3 +1,5 @@
+// authors: Nicolas Reymond, Nadia Cattin
+
 #ifndef CLINIC_H
 #define CLINIC_H
 

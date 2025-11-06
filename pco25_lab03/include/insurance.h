@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #ifndef INSURANCE_H
 #define INSURANCE_H
 

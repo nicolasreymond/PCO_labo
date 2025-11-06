@@ -1,3 +1,4 @@
+// authors: Nicolas Reymond, Nadia Cattin
 #ifndef SELLER_H
 #define SELLER_H
 
