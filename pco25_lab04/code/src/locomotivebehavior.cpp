@@ -39,16 +39,15 @@ void LocomotiveBehavior::run()
 void LocomotiveBehavior::contactSuccession(std::array<int, 4> points, SharedSectionInterface::Direction direction) {
     attendre_contact(points.at(0));
     sharedSection->access(loco, direction);
-    // check son aiguillage entrée
-    // if D1 c'est aiguillages[0]
     if (direction == SharedSectionInterface::Direction::D1) {
+        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageSortie.at(0)) +
+                      " en direction " + std::to_string(aiguillageSortie.at(1));
+        afficher_message_loco(loco.numero(), message.c_str());
         diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
     } else {
         diriger_aiguillage(aiguillageSortie.at(0), aiguillageSortie.at(1), 0);
     }
     attendre_contact(points.at(1));
-    // check son aiguillage sortie
-    // if D1 c'est aiguillages[1]
     if (direction == SharedSectionInterface::Direction::D1) {
         std::string message = "Changement d'aiguillage " + std::to_string(aiguillageSortie.at(0)) +
                       " en direction " + std::to_string(aiguillageSortie.at(1));

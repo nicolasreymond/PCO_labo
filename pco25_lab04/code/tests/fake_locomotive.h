@@ -17,6 +17,15 @@ public:
 
     virtual ~Locomotive() = default;
 
+    int numero() const { return m_id; }
+    int fixeVitesse(int /*vitesse*/) { return 0; }
+    int fixePosition(int /*contactAvant*/, int /*contactArriere*/) { return 0; }
+
+    void inverserSense() {return;}
+    void allumerPhares() { return; }
+    void eteindrePhares() { return; }
+    void afficherMessage(const QString &/*message*/) { return; }
+
     virtual void arreter()  { ++stops_;   running_ = false; }
     virtual void demarrer() { ++starts_;  running_ = true;  }
 
