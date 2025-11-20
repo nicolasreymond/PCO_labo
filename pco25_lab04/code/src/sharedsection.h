@@ -50,8 +50,18 @@ public:
      */
     void access(Locomotive& loco, Direction d) override {
         // TODO
-        // acquire
+        mutex.acquire();
+        while (inUse) {
+            nbWaiting++;
+            loco.arreter();
+            mutex.release();
+            sem.acquire();
+            mutex.acquire();
+        }
+        loco.demarrer();
+        inUse = true;
         afficher_message_loco(loco.numero(), "Accessing");
+        mutex.release();
     }
 
     /**
@@ -60,8 +70,14 @@ public:
      * @param Direction of the locomotive
      */
     void leave(Locomotive& loco, Direction d) override {
-        // TODO
+        mutex.acquire();
+        if (nbWaiting > 0) {
+            nbWaiting--;
+            inUse = false;
+            sem.release();
+        }
         afficher_message_loco(loco.numero(), "Leaving");
+        mutex.release();
     }
 
     /**
@@ -94,10 +110,11 @@ private:
      * Vous êtes libres d'ajouter des méthodes ou attributs
      * pour implémenter la section partagée.
      */
-    PcoSemaphore mutex{0};
-    Direction nextDirection;
-    bool isOccupied{false};
-    bool hasWaitingLoco{false};
+    bool inUse{false};
+    PcoSemaphore sem{0};
+    int nbWaiting{0};
+    Direction currentDirection;
+    PcoSemaphore mutex{1};
 
 };
 
