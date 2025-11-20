@@ -33,6 +33,9 @@ void LocomotiveBehavior::run()
         } else {
             contactSuccession(d2Points, SharedSectionInterface::Direction::D2);
         }
+        attendre_contact(changementDeSens);
+        nbDirectionChange++;
+        loco.inverserSens();
     }
 }
 
@@ -40,8 +43,8 @@ void LocomotiveBehavior::contactSuccession(std::array<int, 4> points, SharedSect
     attendre_contact(points.at(0));
     sharedSection->access(loco, direction);
     if (direction == SharedSectionInterface::Direction::D1) {
-        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageSortie.at(0)) +
-                      " en direction " + std::to_string(aiguillageSortie.at(1));
+        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageEntree.at(0)) +
+                      " en direction " + std::to_string(aiguillageEntree.at(1));
         afficher_message_loco(loco.numero(), message.c_str());
         diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
     } else {

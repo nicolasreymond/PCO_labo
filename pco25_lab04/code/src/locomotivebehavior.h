@@ -27,7 +27,7 @@ public:
      */
     LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection,
         int arriveeD1, int arriveeD2, int releaseD1, int releaseD2, int lastD1, int lastD2,
-        std::array<int, 2> aiguillageEntree, std::array<int, 2> aiguillageSortie):
+        std::array<int, 2> aiguillageEntree, std::array<int, 2> aiguillageSortie, int changementDeSens):
         loco(loco),
         sharedSection(sharedSection)
     {
@@ -37,6 +37,7 @@ public:
         aiguillages = {15, 8};
         this->aiguillageEntree = aiguillageEntree;
         this->aiguillageSortie= aiguillageSortie;
+        this->changementDeSens = changementDeSens;
     }
 
 
@@ -79,6 +80,7 @@ protected:
     std::array<int, 2> aiguillages{};
     std::array<int, 2> aiguillageEntree{};
     std::array<int, 2> aiguillageSortie{};
+    int changementDeSens{0};
 };
 
 #endif // LOCOMOTIVEBEHAVIOR_H

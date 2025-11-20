@@ -73,9 +73,9 @@ public:
         mutex.acquire();
         if (nbWaiting > 0) {
             nbWaiting--;
-            inUse = false;
             sem.release();
         }
+        inUse = false;
         afficher_message_loco(loco.numero(), "Leaving");
         mutex.release();
     }
