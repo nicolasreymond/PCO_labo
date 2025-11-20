@@ -55,26 +55,26 @@ int cmain()
     diriger_aiguillage(2,  DEVIE     , 0);
     diriger_aiguillage(3,  DEVIE     , 0);
     diriger_aiguillage(4,  TOUT_DROIT, 0);
-    diriger_aiguillage(5,  TOUT_DROIT, 0);
-    diriger_aiguillage(6,  TOUT_DROIT, 0);
-    diriger_aiguillage(7,  TOUT_DROIT, 0);
-    diriger_aiguillage(8,  DEVIE     , 0);
+    diriger_aiguillage(5,  DEVIE, 0);
+    diriger_aiguillage(6,  DEVIE, 0);
+    diriger_aiguillage(7,  DEVIE, 0);
+    diriger_aiguillage(8,  DEVIE     , 0); // TODO : à changer par les locos
     diriger_aiguillage(9,  DEVIE     , 0);
     diriger_aiguillage(10, TOUT_DROIT, 0);
-    diriger_aiguillage(11, TOUT_DROIT, 0);
-    diriger_aiguillage(12, TOUT_DROIT, 0);
+    diriger_aiguillage(11, DEVIE, 0);
+    diriger_aiguillage(12, DEVIE, 0);
     diriger_aiguillage(13, TOUT_DROIT, 0);
     diriger_aiguillage(14, DEVIE     , 0);
-    diriger_aiguillage(15, DEVIE     , 0);
-    diriger_aiguillage(16, TOUT_DROIT, 0);
-    diriger_aiguillage(17, TOUT_DROIT, 0);
-    diriger_aiguillage(18, TOUT_DROIT, 0);
+    diriger_aiguillage(15, DEVIE     , 0); // TODO : à changer par les locos
+    diriger_aiguillage(16, DEVIE, 0);
+    diriger_aiguillage(17, DEVIE, 0);
+    diriger_aiguillage(18, DEVIE, 0);
     diriger_aiguillage(19, TOUT_DROIT, 0);
     diriger_aiguillage(20, DEVIE     , 0);
     diriger_aiguillage(21, DEVIE     , 0);
     diriger_aiguillage(22, TOUT_DROIT, 0);
-    diriger_aiguillage(23, TOUT_DROIT, 0);
-    diriger_aiguillage(24, TOUT_DROIT, 0);
+    diriger_aiguillage(23, DEVIE, 0);
+    diriger_aiguillage(24, DEVIE, 0);
 
     // diriger_aiguillage(/*NUMERO*/, /*TOUT_DROIT | DEVIE*/, /*0*/);
 
@@ -84,7 +84,7 @@ int cmain()
 
     // Loco 0
     // Exemple de position de départ
-    locoA.fixerPosition(34, 5);
+    locoA.fixerPosition(26, 27);
 
     // Loco 1
     // Exemple de position de départ
@@ -105,9 +105,9 @@ int cmain()
     std::shared_ptr<SharedSectionInterface> sharedSection = std::make_shared<SharedSection>();
 
     // Création du thread pour la loco 0
-    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection, 26, 18, 17, 27, 15, 24, std::array<int, 2>{15, DEVIE}, std::array<int, 2>{8, DEVIE});
     // Création du thread pour la loco 1
-    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection, 22, 10, 4, 28, 15, 24, std::array<int, 2>{15, TOUT_DROIT}, std::array<int, 2>{8, TOUT_DROIT});
 
     // Lanchement des threads
     afficher_message(qPrintable(QString("Lancement thread loco A (numéro %1)").arg(locoA.numero())));

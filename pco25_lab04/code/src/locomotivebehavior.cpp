@@ -21,17 +21,48 @@ void LocomotiveBehavior::run()
     /* A vous de jouer ! */
 
     // Vous pouvez appeler les méthodes de la section partagée comme ceci :
-    //sharedSection->access(loco);
-    //sharedSection->leave(loco);
+    //sharedSection->access(loco, direction);
+    //sharedSection->leave(loco, direction);
     //sharedSection->stopAtStation(loco);
 
     while(true) {
         // On attend qu'une locomotive arrive sur le contact 1.
         // Pertinent de faire ça dans les deux threads? Pas sûr...
-        attendre_contact(1);
-        loco.afficherMessage("J'ai atteint le contact 1");
+        if (nbDirectionChange % 2 == 0) {
+            contactSuccession(d1Points, SharedSectionInterface::Direction::D1);
+        } else {
+            contactSuccession(d2Points, SharedSectionInterface::Direction::D2);
+        }
     }
 }
+
+void LocomotiveBehavior::contactSuccession(std::array<int, 4> points, SharedSectionInterface::Direction direction) {
+    attendre_contact(points.at(0));
+    sharedSection->access(loco, direction);
+    // check son aiguillage entrée
+    // if D1 c'est aiguillages[0]
+    if (direction == SharedSectionInterface::Direction::D1) {
+        diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
+    } else {
+        diriger_aiguillage(aiguillageSortie.at(0), aiguillageSortie.at(1), 0);
+    }
+    attendre_contact(points.at(1));
+    // check son aiguillage sortie
+    // if D1 c'est aiguillages[1]
+    if (direction == SharedSectionInterface::Direction::D1) {
+        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageSortie.at(0)) +
+                      " en direction " + std::to_string(aiguillageSortie.at(1));
+        afficher_message_loco(loco.numero(), message.c_str());
+        diriger_aiguillage(aiguillageSortie.at(0), aiguillageSortie.at(1), 0);
+    } else {
+        diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
+    }
+    attendre_contact(points.at(2));
+    sharedSection->leave(loco, direction);
+    attendre_contact(points.at(3));
+    sharedSection->release(loco);
+}
+
 
 
 void LocomotiveBehavior::printStartMessage()

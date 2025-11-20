@@ -50,6 +50,8 @@ public:
      */
     void access(Locomotive& loco, Direction d) override {
         // TODO
+        // acquire
+        afficher_message_loco(loco.numero(), "Accessing");
     }
 
     /**
@@ -59,6 +61,7 @@ public:
      */
     void leave(Locomotive& loco, Direction d) override {
         // TODO
+        afficher_message_loco(loco.numero(), "Leaving");
     }
 
     /**
@@ -67,6 +70,7 @@ public:
      */
     void release(Locomotive &loco) override {
         // TODO
+        afficher_message_loco(loco.numero(), "Releasing");
     }
 
     /**
@@ -90,6 +94,10 @@ private:
      * Vous êtes libres d'ajouter des méthodes ou attributs
      * pour implémenter la section partagée.
      */
+    PcoSemaphore mutex{0};
+    Direction nextDirection;
+    bool isOccupied{false};
+    bool hasWaitingLoco{false};
 
 };
 

@@ -55,7 +55,7 @@ public:
 
     /** Determine la position initiale de la locomotive.
      * @param contactAvant Contact vers lequel la locomotive va se diriger.
-     * @param contactArrier Contact a l'arriere de la locomotive.
+     * @param contactArriere Contact a l'arrière de la locomotive.
      */
     void fixerPosition(int contactAvant, int contactArriere);
 
