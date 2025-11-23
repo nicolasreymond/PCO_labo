@@ -12,6 +12,7 @@
 #define SHAREDSECTION_H
 
 #include <QDebug>
+#include <unistd.h>
 
 #include <pcosynchro/pcosemaphore.h>
 
@@ -37,51 +38,103 @@ public:
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    SharedSection() : currentDirection(Direction::D1) {
-        // TODO
+    SharedSection() {
     }
 
     /**
      * @brief Request access to the shared section
-     * @param Locomotive who asked access
-     * @param Direction of the locomotive
+     * @param loco Locomotive who asked access
+     * @param d Direction of the locomotive
      */
     void access(Locomotive &loco, Direction d) override {
-        // TODO
         mutex.acquire();
+        auto it = locoState.find(loco.numero());
+        if (it == locoState.end()) {
+            locoState.emplace(loco.numero(), std::make_tuple(d, std::string("access")));
+        } else {
+            if (std::get<1>(it->second) != "release") {
+                errors++;
+                mutex.release();
+                return;
+            }
+            std::get<0>(it->second) = d;
+            std::get<1>(it->second) = "access";
+        }
+
+        sameDirection = d == currentDirection;
         while (inUse) {
-            nbWaiting++;
             loco.arreter();
+            hasLocoWaiting = true;
             mutex.release();
-            sem.acquire();
+            // Éviter les haut-le-coeur, on veut pas rendre les gens malades !
+            sleep(2);
             mutex.acquire();
         }
-        loco.demarrer();
+        loco.demarrer(); // Ne fais rien si on avance déjà
+        hasLocoWaiting = false;
+        currentDirection = d;
         inUse = true;
         mutex.release();
     }
 
     /**
      * @brief Notify the shared section that a Locomotive has left (not freed yed).
-     * @param Locomotive who left
-     * @param Direction of the locomotive
+     * @param loco Locomotive who left
+     * @param d Direction of the locomotive
      */
     void leave(Locomotive &loco, Direction d) override {
         mutex.acquire();
-        if (nbWaiting > 0) {
-            nbWaiting--;
-            sem.release();
+        auto it = locoState.find(loco.numero());
+        if (it == locoState.end()) {
+            // Si la loco n'existe pas encore dans l'état, c'est une erreur (normalement impossible car on appelle leave après access)
+            errors++;
+            mutex.release();
+            return;
+        }
+        if (std::get<0>(it->second) != d || std::get<1>(it->second) != "access") {
+            // Si la loco n'était pas dans la bonne direction ou n'a pas appelé access en dernier, c'est une erreur
+            errors++;
+            mutex.release();
+            return;
+        }
+        std::get<1>(it->second) = "leave";
+
+        if (hasLocoWaiting && sameDirection) {
+            mutex.release();
+            return;
         }
         inUse = false;
+        sameDirection = false;
         mutex.release();
     }
 
     /**
      * @brief Notify the shared section that it can now be accessed again (freed).
-     * @param Locomotive who sent the notification
+     * @param loco Locomotive who sent the notification
      */
     void release(Locomotive &loco) override {
-        // TODO
+        mutex.acquire();
+        auto it = locoState.find(loco.numero());
+        if (it == locoState.end()) {
+            // Si la loco n'existe pas encore dans l'état, c'est une erreur (normalement impossible car on appelle release après leave)
+            errors++;
+            mutex.release();
+            return;
+        }
+        if (std::get<1>(it->second) != "leave") {
+            // Si la loco n'a pas appelé leave en dernier, c'est une erreur
+            errors++;
+            mutex.release();
+            return;
+        }
+        std::get<1>(it->second) = "release";
+
+        if (hasLocoWaiting && sameDirection) {
+            // Libérer la section partagée et réinitialiser le test de direction
+            inUse = false;
+            sameDirection = false;
+        }
+        mutex.release();
     }
 
     /**
@@ -103,8 +156,10 @@ public:
      * @return nbErrors
      */
     int nbErrors() override {
-        // TODO
-        return 0;
+        mutex.acquire();
+        const int result = errors;
+        mutex.release();
+        return result;
     }
 
 private:
@@ -112,11 +167,14 @@ private:
      * Vous êtes libres d'ajouter des méthodes ou attributs
      * pour implémenter la section partagée.
      */
-    bool inUse{false};
+    bool inUse{false}, sameDirection{false}, hasLocoWaiting{false};
+    Direction currentDirection{Direction::D1};
+
     PcoSemaphore sem{0};
-    int nbWaiting{0};
-    Direction currentDirection;
     PcoSemaphore mutex{1};
+
+    std::map<int, std::tuple<Direction, std::string>> locoState;
+    int errors{0};
 };
 
 

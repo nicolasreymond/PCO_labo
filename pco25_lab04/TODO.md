@@ -34,10 +34,8 @@ Loco B : Commence entre 22 (avant) et 28 (arrière). Parcours : 22, 24, 23, 16, 
 23 DEVIE
 24 DEVIE
 
-TODO : 
-* [ ] Gérer le truc du release / leave en fonction de la direction
+TODO :
 * [ ] Stop d'urgence
-* [ ] nbErrors
 * [ ] Clean un peu le code lol
 * [ ] Des tets ?
 * [ ] Un p'tit rapport des familles
