@@ -28,6 +28,8 @@ class Locomotive;
 class SharedSectionInterface
 {
 public:
+    virtual ~SharedSectionInterface() = default;
+
     /**
      * @brief Direction représente le sens de circulation d’une locomotive
      * dans la section partagée.

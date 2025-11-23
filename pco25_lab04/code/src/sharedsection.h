@@ -1,11 +1,11 @@
-//  /$$$$$$$   /$$$$$$   /$$$$$$         /$$$$$$   /$$$$$$   /$$$$$$  /$$$$$$$ 
-// | $$__  $$ /$$__  $$ /$$__  $$       /$$__  $$ /$$$_  $$ /$$__  $$| $$____/ 
-// | $$  \ $$| $$  \__/| $$  \ $$      |__/  \ $$| $$$$\ $$|__/  \ $$| $$      
-// | $$$$$$$/| $$      | $$  | $$        /$$$$$$/| $$ $$ $$  /$$$$$$/| $$$$$$$ 
+//  /$$$$$$$   /$$$$$$   /$$$$$$         /$$$$$$   /$$$$$$   /$$$$$$  /$$$$$$$
+// | $$__  $$ /$$__  $$ /$$__  $$       /$$__  $$ /$$$_  $$ /$$__  $$| $$____/
+// | $$  \ $$| $$  \__/| $$  \ $$      |__/  \ $$| $$$$\ $$|__/  \ $$| $$
+// | $$$$$$$/| $$      | $$  | $$        /$$$$$$/| $$ $$ $$  /$$$$$$/| $$$$$$$
 // | $$____/ | $$      | $$  | $$       /$$____/ | $$\ $$$$ /$$____/ |_____  $$
 // | $$      | $$    $$| $$  | $$      | $$      | $$ \ $$$| $$       /$$  \ $$
 // | $$      |  $$$$$$/|  $$$$$$/      | $$$$$$$$|  $$$$$$/| $$$$$$$$|  $$$$$$/
-// |__/       \______/  \______/       |________/ \______/ |________/ \______/ 
+// |__/       \______/  \______/       |________/ \______/ |________/ \______/
 
 
 #ifndef SHAREDSECTION_H
@@ -38,8 +38,7 @@ public:
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    SharedSection() {
-    }
+    SharedSection() = default;
 
     /**
      * @brief Request access to the shared section
@@ -50,15 +49,15 @@ public:
         mutex.acquire();
         auto it = locoState.find(loco.numero());
         if (it == locoState.end()) {
-            locoState.emplace(loco.numero(), std::make_tuple(d, std::string("access")));
+            locoState.emplace(loco.numero(), LocoInfo{d, LocoState::Access});
         } else {
-            if (std::get<1>(it->second) != "release") {
+            if (it->second.state != LocoState::Release) {
                 errors++;
                 mutex.release();
                 return;
             }
-            std::get<0>(it->second) = d;
-            std::get<1>(it->second) = "access";
+            it->second.dir = d;
+            it->second.state = LocoState::Access;
         }
 
         sameDirection = d == currentDirection;
@@ -91,13 +90,13 @@ public:
             mutex.release();
             return;
         }
-        if (std::get<0>(it->second) != d || std::get<1>(it->second) != "access") {
+        if (it->second.dir != d || it->second.state != LocoState::Access) {
             // Si la loco n'était pas dans la bonne direction ou n'a pas appelé access en dernier, c'est une erreur
             errors++;
             mutex.release();
             return;
         }
-        std::get<1>(it->second) = "leave";
+        it->second.state = LocoState::Leave;
 
         if (hasLocoWaiting && sameDirection) {
             mutex.release();
@@ -121,13 +120,13 @@ public:
             mutex.release();
             return;
         }
-        if (std::get<1>(it->second) != "leave") {
+        if (it->second.state != LocoState::Leave) {
             // Si la loco n'a pas appelé leave en dernier, c'est une erreur
             errors++;
             mutex.release();
             return;
         }
-        std::get<1>(it->second) = "release";
+        it->second.state = LocoState::Release;
 
         if (hasLocoWaiting && sameDirection) {
             // Libérer la section partagée et réinitialiser le test de direction
@@ -167,13 +166,20 @@ private:
      * Vous êtes libres d'ajouter des méthodes ou attributs
      * pour implémenter la section partagée.
      */
+    enum class LocoState { Access, Leave, Release };
+
+    struct LocoInfo {
+        Direction dir;
+        LocoState state;
+    };
+
     bool inUse{false}, sameDirection{false}, hasLocoWaiting{false};
     Direction currentDirection{Direction::D1};
 
     PcoSemaphore sem{0};
     PcoSemaphore mutex{1};
 
-    std::map<int, std::tuple<Direction, std::string>> locoState;
+    std::map<int, LocoInfo> locoState;
     int errors{0};
 };
 
