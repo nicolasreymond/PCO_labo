@@ -25,7 +25,7 @@ void LocomotiveBehavior::run()
     //sharedSection->leave(loco, direction);
     //sharedSection->stopAtStation(loco);
 
-    while(true) {
+    while(loco.vitesse() != 0) {
         // On attend qu'une locomotive arrive sur le contact 1.
         // Pertinent de faire ça dans les deux threads? Pas sûr...
         if (nbDirectionChange % 2 == 0) {
@@ -37,6 +37,9 @@ void LocomotiveBehavior::run()
         nbDirectionChange++;
         loco.inverserSens();
     }
+
+    // Si la vitesse est nulle, c'est qu'il y a eu arrêt d'urgence
+    sharedSection->stopAll();
 }
 
 void LocomotiveBehavior::contactSuccession(std::array<int, 4> points, SharedSectionInterface::Direction direction) {

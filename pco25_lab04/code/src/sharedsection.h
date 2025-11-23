@@ -22,7 +22,7 @@
 #endif
 
 #ifndef USE_FAKE_LOCO
-  #include "ctrain_handler.h"
+#include "ctrain_handler.h"
 #endif
 
 #include "sharedsectioninterface.h"
@@ -31,15 +31,13 @@
  * @brief La classe SharedSection implémente l'interface SharedSectionInterface qui
  * propose les méthodes liées à la section partagée.
  */
-class SharedSection final : public SharedSectionInterface
-{
+class SharedSection final : public SharedSectionInterface {
 public:
-
     /**
      * @brief SharedSection Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    SharedSection() {
+    SharedSection() : currentDirection(Direction::D1) {
         // TODO
     }
 
@@ -48,7 +46,7 @@ public:
      * @param Locomotive who asked access
      * @param Direction of the locomotive
      */
-    void access(Locomotive& loco, Direction d) override {
+    void access(Locomotive &loco, Direction d) override {
         // TODO
         mutex.acquire();
         while (inUse) {
@@ -60,7 +58,6 @@ public:
         }
         loco.demarrer();
         inUse = true;
-        afficher_message_loco(loco.numero(), "Accessing");
         mutex.release();
     }
 
@@ -69,14 +66,13 @@ public:
      * @param Locomotive who left
      * @param Direction of the locomotive
      */
-    void leave(Locomotive& loco, Direction d) override {
+    void leave(Locomotive &loco, Direction d) override {
         mutex.acquire();
         if (nbWaiting > 0) {
             nbWaiting--;
             sem.release();
         }
         inUse = false;
-        afficher_message_loco(loco.numero(), "Leaving");
         mutex.release();
     }
 
@@ -86,14 +82,20 @@ public:
      */
     void release(Locomotive &loco) override {
         // TODO
-        afficher_message_loco(loco.numero(), "Releasing");
     }
 
     /**
      * @brief Stop all locomotives to access this shared section
      */
     void stopAll() override {
-        // TODO
+        // Useless ?
+        /*
+         * Comme j'ai rien à mettre ici, voici une petite histoire (vraiment rien de pertinent, à ne lire qu'en cas de temps à perdre) :
+         *
+         * C'est l'histoire d'un jeune paon. Il vivait dans la forêt avec sa famille. Un jour, il décida de partir à
+         * l'aventure pour découvrir le monde. Il a voulu traverser des rails, quand il s'est rendu compte qu'il y avait déjà un autre paon !
+         * TODO : À compléter (avant de faire les tests idéalement, question de priorité)
+         */
     }
 
     /**
@@ -115,7 +117,6 @@ private:
     int nbWaiting{0};
     Direction currentDirection;
     PcoSemaphore mutex{1};
-
 };
 
 
