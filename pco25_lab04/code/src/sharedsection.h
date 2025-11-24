@@ -51,7 +51,7 @@ public:
         if (it == locoState.end()) {
             locoState.emplace(loco.numero(), LocoInfo{d, LocoState::Access});
         } else {
-            if (it->second.state != LocoState::Release) {
+            if (it->second.state == LocoState::Access) {
                 errors++;
                 mutex.release();
                 return;
