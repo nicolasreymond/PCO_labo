@@ -144,9 +144,31 @@ public:
         /*
          * Comme j'ai rien à mettre ici, voici une petite histoire (vraiment rien de pertinent, à ne lire qu'en cas de temps à perdre) :
          *
-         * C'est l'histoire d'un jeune paon. Il vivait dans la forêt avec sa famille. Un jour, il décida de partir à
-         * l'aventure pour découvrir le monde. Il a voulu traverser des rails, quand il s'est rendu compte qu'il y avait déjà un autre paon !
-         * TODO : À compléter (avant de faire les tests idéalement, question de priorité)
+         * C'est l'histoire d'un jeune paon. Il vivait tranquillement dans la forêt avec sa famille,
+         * sans se douter que son destin allait un jour inclure des rails et des problèmes de synchronisation.
+         *
+         * Un matin, animé par une irrépressible envie d’aventure, il décida d’explorer le monde.
+         * Sur son chemin, il rencontra une voie ferrée mystérieuse, longue et légèrement inquiétante.
+         *
+         * Alors qu’il s’apprêtait à traverser, il aperçut un autre paon arrivant en face.
+         * Les deux paons s’arrêtèrent instantanément.
+         *
+         * "Vas-y en premier."
+         * "Non, je t’en prie."
+         *
+         * Aucun des deux ne bougea.
+         *
+         * Les minutes passèrent (dur à dire exactement, aucun paon ne sachant lire l’heure),
+         * puis les heures, puis probablement des jours.
+         * Les trains ne passèrent pas, car il s’agit d’une simulation.
+         *
+         * Les deux paons restèrent là, se regardant intensément, refusant chacun d’entrer
+         * sur les rails tant que l’autre n’en sortait pas.
+         *
+         * Ce fut le premier deadlock documenté dans la forêt.
+         *
+         * On raconte que les paons sont encore là aujourd’hui,
+         * immobiles, parfaitement synchronisés dans leur incapacité à avancer.
          */
     }
 
