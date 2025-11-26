@@ -21,9 +21,9 @@ void LocomotiveBehavior::run()
     // Comportement principal, alterner les directions tant que la vitesse n'est pas nulle (urgence)
     while(loco.vitesse() != 0) {
         if (nbDirectionChange % 2 == 0) {
-            contactSuccession(d1Points, SharedSectionInterface::Direction::D1);
+            contactSuccession(d1Points, aiguillageEntree, aiguillageSortie, SharedSectionInterface::Direction::D1);
         } else {
-            contactSuccession(d2Points, SharedSectionInterface::Direction::D2);
+            contactSuccession(d2Points, aiguillageSortie, aiguillageEntree, SharedSectionInterface::Direction::D2);
         }
         attendre_contact(changementDeSens);
         nbDirectionChange++;
@@ -34,28 +34,21 @@ void LocomotiveBehavior::run()
     sharedSection->stopAll();
 }
 
-void LocomotiveBehavior::contactSuccession(std::array<int, 4> points, SharedSectionInterface::Direction direction) {
+void LocomotiveBehavior::contactSuccession(const std::array<int, 4> &points, const std::array<int, 2> &in, const std::array<int, 2> &out, const SharedSectionInterface::Direction direction) const {
+    // Premier point : demander l'accès et changer l'aiguillage d'entrée
     attendre_contact(points.at(0));
     sharedSection->access(loco, direction);
-    if (direction == SharedSectionInterface::Direction::D1) {
-        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageEntree.at(0)) +
-                      " en direction " + std::to_string(aiguillageEntree.at(1));
-        afficher_message_loco(loco.numero(), message.c_str());
-        diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
-    } else {
-        diriger_aiguillage(aiguillageSortie.at(0), aiguillageSortie.at(1), 0);
-    }
+    diriger_aiguillage(in.at(0), in.at(1), 0);
+
+    // Deuxième point : changer l'aiguillage de sortie
     attendre_contact(points.at(1));
-    if (direction == SharedSectionInterface::Direction::D1) {
-        std::string message = "Changement d'aiguillage " + std::to_string(aiguillageSortie.at(0)) +
-                      " en direction " + std::to_string(aiguillageSortie.at(1));
-        afficher_message_loco(loco.numero(), message.c_str());
-        diriger_aiguillage(aiguillageSortie.at(0), aiguillageSortie.at(1), 0);
-    } else {
-        diriger_aiguillage(aiguillageEntree.at(0), aiguillageEntree.at(1), 0);
-    }
+    diriger_aiguillage(out.at(0), out.at(1), 0);
+
+    // Troisième point : quitter la section partagée
     attendre_contact(points.at(2));
     sharedSection->leave(loco, direction);
+
+    // Quatrième point : libérer la section partagée
     attendre_contact(points.at(3));
     sharedSection->release(loco);
 }

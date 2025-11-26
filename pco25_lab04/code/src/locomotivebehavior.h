@@ -18,27 +18,28 @@
 /**
  * @brief La classe LocomotiveBehavior représente le comportement d'une locomotive
  */
-class LocomotiveBehavior : public Launchable
-{
+class LocomotiveBehavior : public Launchable {
 public:
     /*!
      * \brief locomotiveBehavior Constructeur de la classe
-     * \param loco la locomotive dont on représente le comportement
+     * @param loco Référence vers la locomotive (non propriétaire).
+     * @param sharedSection Section partagée.
+     * @param p_arriveeD1,p_arriveeD2,p_releaseD1,p_releaseD2,p_lastD1,p_lastD2 Points de contact liés à la section
+     * critique en fonction de la direction.
+     * @param p_aiguillageEntree,p_aiguillageSortie {id,dir} aiguillages et sens associé.
+     * @param p_changementDeSens Contact auquel la locomotive change de sens.
      */
-    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SharedSectionInterface> sharedSection,
-        int arriveeD1, int arriveeD2, int releaseD1, int releaseD2, int lastD1, int lastD2,
-        std::array<int, 2> aiguillageEntree, std::array<int, 2> aiguillageSortie, int changementDeSens):
-        loco(loco),
-        sharedSection(sharedSection)
-    {
-        // Eventuel code supplémentaire du constructeur
-        d1Points = {arriveeD1, lastD1, arriveeD2, releaseD1};
-        d2Points = {arriveeD2, lastD2, arriveeD1, releaseD2};
-        this->aiguillageEntree = aiguillageEntree;
-        this->aiguillageSortie= aiguillageSortie;
-        this->changementDeSens = changementDeSens;
+    LocomotiveBehavior(Locomotive &loco, std::shared_ptr<SharedSectionInterface> sharedSection,
+                       int p_arriveeD1, int p_arriveeD2, int p_releaseD1, int p_releaseD2, int p_lastD1, int p_lastD2,
+                       std::array<int, 2> p_aiguillageEntree, std::array<int, 2> p_aiguillageSortie,
+                       int p_changementDeSens) : loco(loco),
+                                                 sharedSection(sharedSection),
+                                                 d1Points{p_arriveeD1, p_lastD1, p_arriveeD2, p_releaseD1},
+                                                 d2Points{p_arriveeD2, p_lastD2, p_arriveeD1, p_releaseD2},
+                                                 aiguillageEntree(p_aiguillageEntree),
+                                                 aiguillageSortie(p_aiguillageSortie),
+                                                 changementDeSens(p_changementDeSens) {
     }
-
 
 protected:
     /*!
@@ -56,12 +57,20 @@ protected:
      */
     void printCompletionMessage() override;
 
-    void contactSuccession(std::array<int, 4> points, SharedSectionInterface::Direction direction);
+    /**
+     * @brief Exécute la séquence des 4 contacts pour traverser la section partagée.
+     * @param points Tableau de 4 contacts (en fonction de la direction).
+     * @param in Aiguillage d'entrée {id,dir}.
+     * @param out Aiguillage de sortie {id,dir}.
+     * @param direction Direction de traversée.
+    */
+    void contactSuccession(const std::array<int, 4> &points, const std::array<int, 2> &in,
+                           const std::array<int, 2> &out, SharedSectionInterface::Direction direction) const;
 
     /**
-     * @brief loco La locomotive dont on représente le comportement
+     * @brief Loco La locomotive dont on représente le comportement
      */
-    Locomotive& loco;
+    Locomotive &loco;
 
     /**
      * @brief sharedSection Pointeur sur la section partagée
