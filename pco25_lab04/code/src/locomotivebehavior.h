@@ -34,7 +34,6 @@ public:
         // Eventuel code supplémentaire du constructeur
         d1Points = {arriveeD1, lastD1, arriveeD2, releaseD1};
         d2Points = {arriveeD2, lastD2, arriveeD1, releaseD2};
-        aiguillages = {15, 8};
         this->aiguillageEntree = aiguillageEntree;
         this->aiguillageSortie= aiguillageSortie;
         this->changementDeSens = changementDeSens;
@@ -77,7 +76,6 @@ protected:
     int nbDirectionChange{0};
     std::array<int, 4> d1Points{};
     std::array<int, 4> d2Points{};
-    std::array<int, 2> aiguillages{};
     std::array<int, 2> aiguillageEntree{};
     std::array<int, 2> aiguillageSortie{};
     int changementDeSens{0};

@@ -18,16 +18,8 @@ void LocomotiveBehavior::run()
     loco.demarrer();
     loco.afficherMessage("Ready!");
 
-    /* A vous de jouer ! */
-
-    // Vous pouvez appeler les méthodes de la section partagée comme ceci :
-    //sharedSection->access(loco, direction);
-    //sharedSection->leave(loco, direction);
-    //sharedSection->stopAtStation(loco);
-
+    // Comportement principal, alterner les directions tant que la vitesse n'est pas nulle (urgence)
     while(loco.vitesse() != 0) {
-        // On attend qu'une locomotive arrive sur le contact 1.
-        // Pertinent de faire ça dans les deux threads? Pas sûr...
         if (nbDirectionChange % 2 == 0) {
             contactSuccession(d1Points, SharedSectionInterface::Direction::D1);
         } else {
