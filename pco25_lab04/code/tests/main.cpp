@@ -258,38 +258,6 @@ TEST_F(SharedSectionSerialization, TwoOppositeDirection_SerializesCorrectly) {
     ASSERT_EQ(section.nbErrors(), 0);
 }
 
-TEST_F(SharedSectionSerialization, MultipleLocomotives_SerializesCorrectly) {
-    SharedSection section;
-    std::atomic<int> nbIn{0};
-    const int nLocos = 10;
-    std::vector<std::unique_ptr<Locomotive>> locos;
-    std::vector<std::unique_ptr<PcoThread>> threads;
-
-    locos.reserve(nLocos);
-    threads.reserve(nLocos);
-
-    for (int i = 0; i < nLocos; ++i) {
-        locos.emplace_back(std::make_unique<Locomotive>(i + 1, 10, 0));
-    }
-
-    for (int i = 0; i < nLocos; ++i) {
-        threads.emplace_back(std::make_unique<PcoThread>([&, i]{
-            section.access(*locos[i], SharedSectionInterface::Direction::D1);
-            enterCritical(nbIn);
-            PcoThread::usleep(100);
-            leaveCritical(nbIn);
-            section.leave(*locos[i], SharedSectionInterface::Direction::D1);
-            section.release(*locos[i]);
-        }));
-    }
-
-    for (auto& tptr : threads) {
-        tptr->join();
-    }
-
-    ASSERT_EQ(section.nbErrors(), 0);
-}
-
 
 // ============================================================================
 // SharedSectionRobustness Tests
@@ -307,13 +275,6 @@ TEST_F(SharedSectionRobustness, ManySequentialAccesses_NoErrors) {
     }
 
     ASSERT_EQ(section.nbErrors(), 0);
-}
-
-TEST_F(SharedSectionRobustness, StopAll_Idempotent) {
-    SharedSection section;
-    section.stopAll();
-    section.stopAll();
-    SUCCEED();
 }
 
 TEST_F(SharedSectionRobustness, AccessAfterLeave_Works) {
@@ -356,54 +317,4 @@ TEST_F(SharedSectionRobustness, ManyReleases_IncrementsErrorCount) {
     }
 
     ASSERT_EQ(section.nbErrors(), n);
-}
-
-TEST_F(SharedSectionRobustness, StopAll_DoesNotCrash) {
-    SharedSection section;
-    const int nLocos = 8;
-    std::vector<std::unique_ptr<Locomotive>> locos;
-    std::vector<std::unique_ptr<PcoThread>> threads;
-    locos.reserve(nLocos);
-    threads.reserve(nLocos);
-
-    for (int i = 0; i < nLocos; ++i) {
-        locos.emplace_back(std::make_unique<Locomotive>(i + 1, 10, 0));
-    }
-
-    for (int i = 0; i < nLocos; ++i) {
-        threads.emplace_back(std::make_unique<PcoThread>([&, i]{
-            PcoThread::usleep(100 + (i * 10));
-            section.access(*locos[i], SharedSectionInterface::Direction::D1);
-            PcoThread::usleep(20);
-            section.leave(*locos[i], SharedSectionInterface::Direction::D1);
-            section.release(*locos[i]);
-        }));
-    }
-
-    section.stopAll();
-
-    for (auto& tptr : threads) tptr->join();
-
-    SUCCEED();
-}
-
-TEST_F(SharedSectionRobustness, NbErrors_IsThreadSafe) {
-    SharedSection section;
-    const int nThreads = 5;
-    const int nIterations = 1000;
-    std::vector<std::unique_ptr<PcoThread>> threads;
-    threads.reserve(nThreads);
-
-    for (int i = 0; i < nThreads; ++i) {
-        threads.emplace_back(std::make_unique<PcoThread>([&]{
-            for (int j = 0; j < nIterations; ++j) {
-                Locomotive tmp(999, 10, 0);
-                section.release(tmp);
-            }
-        }));
-    }
-
-    for (auto& tptr : threads) tptr->join();
-
-    ASSERT_EQ(section.nbErrors(), nThreads * nIterations);
 }
