@@ -1,0 +1,6 @@
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/hospital_core.dir
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/pco_hospital.dir
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/unit_tests.dir
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/test.dir
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/edit_cache.dir
+/Users/nadiacattin/Library/Mobile Documents/com~apple~CloudDocs/Semestre3/PCO/Labos/PCO_labo/pco25_lab03/CMakeFiles/rebuild_cache.dir

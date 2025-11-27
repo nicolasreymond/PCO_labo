@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/pco_hospital.dir/src/main.cpp.o -o pco_hospital  libhospital_core.a -lpcosynchro

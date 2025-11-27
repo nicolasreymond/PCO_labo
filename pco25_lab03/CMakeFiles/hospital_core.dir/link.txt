@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhospital_core.a CMakeFiles/hospital_core.dir/src/supplier.cpp.o CMakeFiles/hospital_core.dir/src/clinic.cpp.o CMakeFiles/hospital_core.dir/src/utils.cpp.o CMakeFiles/hospital_core.dir/src/seller.cpp.o CMakeFiles/hospital_core.dir/src/hospital.cpp.o CMakeFiles/hospital_core.dir/src/ambulance.cpp.o CMakeFiles/hospital_core.dir/src/insurance.cpp.o
+/usr/bin/ranlib libhospital_core.a
